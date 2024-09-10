@@ -1,0 +1,72 @@
+.header {
+    position: relative;
+    z-index: 1000;
+}
+
+.canvas-container {
+    display: grid;
+    flex-direction: column;
+    overflow: hidden;
+    justify-content: center;
+    align-content: center;
+    height: 92vh;
+}
+
+.scroll-container {
+    overflow: auto;
+}
+
+canvas {
+    display: block;
+}
+
+.download_btn {
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+.sidebar {
+    border-left: 2px solid #000;
+}
+
+#thumbnailCanvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: white;
+    padding: 20px;
+}
+
+li {
+    list-style: none;
+}
+
+.img-color {
+    display: flex;
+    align-items: center;
+}
+
+.color-mini {
+    width: 20px;
+    height: 20px;
+    border: #000 solid 1px;
+    margin-right: 5px;
+    margin-top: 1px;
+}
+
+.tooltip-toggle {
+    color: inherit; /* Использовать цвет, унаследованный от родительского элемента */
+    text-decoration: none; /* Убрать подчеркивание */
+  }
+
+.tooltip-toggle:hover .tooltip-icon {
+    color:#68a2ca;
+}

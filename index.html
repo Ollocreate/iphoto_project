@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhoto</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"> 
+    <link rel="stylesheet" href="./style.css"> 
+</head>
+<body>
+
+  <div class="container-fluid main-page">
+    <header class="header">
+      <div class="btn-group" role="group" aria-label="Меню">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Файл
+          </button>
+          <ul class="dropdown-menu">
+            <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#importModal">Загрузить</button></li>
+            <li><button class="dropdown-item" type="button">Сохранить</button></li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-light">Редактировать</button>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Изображение
+          </button>
+          <ul class="dropdown-menu">
+            <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#resizeModal">Изменить размер</button></li>
+          </ul>
+        </div>
+        <button type="button" class="btn btn-light">Слои</button>
+        <button type="button" class="btn btn-light">Фильтры</button>
+      </div>
+    </header>
+    
+    <div class="container-fluid mb-3">
+      <div class="row">
+          <div class="col-10 canvas-container">
+            <div class="scroll-container">
+                <canvas id="imageCanvas"></canvas>
+            </div>
+        </div>
+        <div class="sidebar col-2 justify-content-center ">
+          <canvas id="thumbnailCanvas"></canvas>
+          <p>Свойства:</p>
+          <li class="img-size">
+            <div id="color-info">Color: </div>
+            <div id="color-sample"></div>
+          </li>
+          <li class="img-size">
+            <div class="info-panel-item" id="position-info">Position: </div>
+          </li>
+          <li class="img-size">
+            <div class="info-panel-item" id="image-size-info">Image Size: </div>
+          </li>
+          <li class="img-coordinates"></li>
+          <li class="img-color"></li>
+          <select class="form-select mt-1" id="scaleSelect" aria-label="select example">
+              <option value="0.12">12%</option>
+              <option value="0.25">25%</option>
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1">100%</option>
+              <option value="1.5">150%</option>
+              <option value="2">200%</option>
+              <option value="3">300%</option>
+          </select>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="importModalLabel">Загрузка изображения</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+        <div class="modal-body">
+          <form id="importForm">
+            <div class="mb-4">
+              <label for="fileInput" class="form-label">Выберите изображение с компьютера</label>
+              <input type="file" class="form-control" id="fileInput" aria-describedby="emailHelp">
+              <div id="fileHelp" class="form-text">Поддерживаются форматы JPG и PNG</div>
+            </div>
+            <div class="mb-4 ">
+              <div class="position-absolute start-50 translate-middle">
+                <p>ИЛИ</p>
+              </div>
+              <label for="urlInput" class="form-label">Введите URL</label>
+              <input type="text" class="form-control" id="urlInput">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <button type="submit" class="btn btn-primary" form="importForm" data-bs-dismiss="modal" id="uploadBtn">Сохранить</button>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="modal fade" id="resizeModal" tabindex="-1" aria-labelledby="resizeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resizeModalLabel">Изменить размеры изображения</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body">
+            <form id="resizeForm">
+              <div id="originalSize" class="form-text mb-4">
+                <span>Исходный размер изображения <span id="originalPixelCount"></span> Мп</span>
+              </div>
+              <div class="mb-4 row g-3">
+                <div class="col-3">
+                  <label for="resizeUnitsSelect" class="form-label">Единицы измерения</label>
+                </div>
+                <div class="col-3">
+                  <select class="form-select mt-1 col-3" id="resizeUnitsSelect" aria-label="resize units select">
+                    <option value="pixels">px</option>
+                    <option value="percents">%</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-4 row g-3 align-items-baseline">
+                <div class="col-3">
+                  <label for="heightInput" class="form-label col-auto">Высота</label>
+                </div>
+                <div class="col-auto">
+                  <input type="text" class="form-control col-auto" id="newHeightInput">
+                </div>
+              </div>
+              <div class="mb-2 row g-3 align-items-baseline">
+                <div class="col-3">
+                  <label for="widthInput" class="form-label">Ширина</label>
+                </div>
+                <div class="col-auto">
+                  <input type="text" class="form-control" id="newWidthInput">
+                </div>
+              </div>
+              <div class="mb-4 row g-3 align-items-baseline">
+                <div class="col-auto">
+                  <input type="checkbox" class="form-check-input" id="proportionsCheckbox">
+                </div>
+                <div class="col-auto">
+                  <label for="proportionsCheckbox" class="form-label">С сохранением пропорций</label>
+                </div>
+              </div>
+              <div class="mb-4">
+                <label for="resizeMethodsSelect" class="form-label">Способ масштабирования
+                  <a class="tooltip-toggle" data-toggle="tooltip" title="Масштабирование по принципу ближайшего соседа - это метод изменения размера изображения, при котором каждый пиксель в новом изображении заполняется значениями пикселей из исходного изображения, находящихся ближе всего к центру нового пикселя. Этот метод является одним из простейших методов интерполяции.">
+                    <svg viewBox="0 0 16 16" version="1.1" x="0px" y="0px" width="16px" height="16px">
+                      <path d="M8,16 C3.581722,16 0,12.418278 0,8 C0,3.581722 3.581722,0 8,0 C12.418278,0 16,3.581722 16,8 C16,12.418278 12.418278,16 8,16 Z M7.08229167,9.96549479 L8.75807292,9.96549479 C8.76588546,9.66861831 8.80690067,9.42350357 8.88111979,9.23014323 C8.95533891,9.03678289 9.08815008,8.84830821 9.27955729,8.66471354 L9.95338542,8.03776042 C10.2385431,7.76041528 10.4455723,7.48893362 10.5744792,7.22330729 C10.7033861,6.95768096 10.7678385,6.66276204 10.7678385,6.33854167 C10.7678385,5.59635046 10.5285831,5.02409055 10.0500651,4.62174479 C9.57154709,4.21939903 8.89674915,4.01822917 8.02565104,4.01822917 C7.15064667,4.01822917 6.47096596,4.23600043 5.98658854,4.67154948 C5.50221112,5.10709853 5.25611983,5.71549089 5.24830729,6.49674479 L7.22877604,6.49674479 C7.23658858,6.20377458 7.31275969,5.97135503 7.45729167,5.79947917 C7.60182364,5.62760331 7.79127487,5.54166667 8.02565104,5.54166667 C8.53346608,5.54166667 8.78736979,5.83658559 8.78736979,6.42643229 C8.78736979,6.668621 8.71217523,6.89029847 8.56178385,7.09147135 C8.41139248,7.29264424 8.19166811,7.51432171 7.90260417,7.75651042 C7.61354022,7.99869913 7.40455794,8.28482908 7.27565104,8.61490885 C7.14674415,8.94498863 7.08229167,9.39517944 7.08229167,9.96549479 Z M6.84205729,11.7467448 C6.84205729,12.0358087 6.94654843,12.2731111 7.15553385,12.4586589 C7.36451927,12.6442067 7.62525885,12.7369792 7.93776042,12.7369792 C8.25026198,12.7369792 8.51100156,12.6442067 8.71998698,12.4586589 C8.9289724,12.2731111 9.03346354,12.0358087 9.03346354,11.7467448 C9.03346354,11.4576808 8.9289724,11.2203785 8.71998698,11.0348307 C8.51100156,10.8492829 8.25026198,10.7565104 7.93776042,10.7565104 C7.62525885,10.7565104 7.36451927,10.8492829 7.15553385,11.0348307 C6.94654843,11.2203785 6.84205729,11.4576808 6.84205729,11.7467448 Z"/>
+                    </svg>
+                  </a>
+                </label>
+                <select class="form-select mt-1" id="resizeMethodsSelect" aria-label="resize methods select">
+                  <option value="nearest-neighbor">Ближайший сосед</option>
+                  <option value="bilinear" disabled>Билинейное</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            <button type="submit" class="btn btn-primary" form="resizeForm" data-bs-dismiss="modal">Изменить</button>
+          </div>
+        </div>
+      </div>
+      </div>
+</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <script src="./script.js"></script>
+</body>
+</html>
