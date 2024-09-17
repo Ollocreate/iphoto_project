@@ -19,7 +19,7 @@
           </button>
           <ul class="dropdown-menu">
             <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#importModal">Загрузить</button></li>
-            <li><button class="dropdown-item" type="button">Сохранить</button></li>
+            <li><button class="dropdown-item" type="button" id="saveBtn">Сохранить</button></li>
           </ul>
         </div>
         <button type="button" class="btn btn-light">Редактировать</button>
@@ -28,7 +28,7 @@
             Изображение
           </button>
           <ul class="dropdown-menu">
-            <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#resizeModal">Изменить размер</button></li>
+            <li><button id="resizeBtn" class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#resizeModal">Изменить размер</button></li>
           </ul>
         </div>
         <button type="button" class="btn btn-light">Слои</button>
@@ -45,25 +45,24 @@
         </div>
         <div class="sidebar col-2 justify-content-center ">
           <canvas id="thumbnailCanvas"></canvas>
-          <p>Свойства:</p>
-          <li class="img-size">
-            <div id="color-info">Color: </div>
-            <div id="color-sample"></div>
+          <p class="properties">Свойства:</p>
+          <li class="img-color">
+            <div>Цвет (rgb): </div>
+            <div id="colorMini"></div>
+            <div id="colorInfo"></div>
+          </li>
+          <li class="img-coordinates">
+            <div class="side-panel-item" id="positionInfo">XY: </div>
           </li>
           <li class="img-size">
-            <div class="info-panel-item" id="position-info">Position: </div>
+            <div class="side-panel-item" id="imageSizeInfo">Размер: </div>
           </li>
-          <li class="img-size">
-            <div class="info-panel-item" id="image-size-info">Image Size: </div>
-          </li>
-          <li class="img-coordinates"></li>
-          <li class="img-color"></li>
           <select class="form-select mt-1" id="scaleSelect" aria-label="select example">
               <option value="0.12">12%</option>
               <option value="0.25">25%</option>
               <option value="0.5">50%</option>
               <option value="0.75">75%</option>
-              <option value="1">100%</option>
+              <option value="1" selected="selected">100%</option>
               <option value="1.5">150%</option>
               <option value="2">200%</option>
               <option value="3">300%</option>
@@ -114,7 +113,8 @@
           <div class="modal-body">
             <form id="resizeForm">
               <div id="originalSize" class="form-text mb-4">
-                <span>Исходный размер изображения <span id="originalPixelCount"></span> Мп</span>
+                <div>Исходный размер <span id="originalPixelCount"></span> Мп</div>
+                <div>Итоговый размер <span id="resizedPixelCount"></span> Мп</div>
               </div>
               <div class="mb-4 row g-3">
                 <div class="col-3">
@@ -168,7 +168,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-            <button type="submit" class="btn btn-primary" form="resizeForm" data-bs-dismiss="modal">Изменить</button>
+            <button type="submit" class="btn btn-primary" form="resizeForm" data-bs-dismiss="modal" id="confirmResizeBtn">Изменить</button>
           </div>
         </div>
       </div>

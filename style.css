@@ -10,6 +10,7 @@
     justify-content: center;
     align-content: center;
     height: 92vh;
+    background-color: lightgray;
 }
 
 .scroll-container {
@@ -25,6 +26,10 @@ canvas {
     position: absolute;
     top: 50%;
     left: 50%;
+}
+
+.properties {
+    margin-bottom: 3px;
 }
 
 .sidebar {
@@ -54,17 +59,16 @@ li {
     align-items: center;
 }
 
-.color-mini {
+#colorMini {
     width: 20px;
     height: 20px;
     border: #000 solid 1px;
-    margin-right: 5px;
-    margin-top: 1px;
+    margin: 1px 5px 0 5px;
 }
 
 .tooltip-toggle {
-    color: inherit; /* Использовать цвет, унаследованный от родительского элемента */
-    text-decoration: none; /* Убрать подчеркивание */
+    color: inherit; 
+    text-decoration: none;
   }
 
 .tooltip-toggle:hover .tooltip-icon {

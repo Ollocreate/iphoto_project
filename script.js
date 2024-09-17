@@ -1,156 +1,131 @@
-document.getElementById('importForm').addEventListener('submit', function(event) {
-    event.preventDefault();
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+    });
 });
 
 document.addEventListener("DOMContentLoaded", function() {
     const canvas = document.getElementById("imageCanvas");
-    const colorInfo = document.getElementById("color-info");
-    const positionInfo = document.getElementById("position-info");
-    const imageSizeInfo = document.getElementById("image-size-info");
-    const fileUploadBtn = document.getElementById("file-upload");
-    const urlUploadBtn = document.getElementById("url-upload");
-    const resizeBtn = document.getElementById("resize-button");
-    const saveBtn = document.getElementById("save-button");
-    const colorSample = document.getElementById("color-sample");
-    const scrollContainer = document.querySelector(".scroll-container");
+    const thumbnailCanvas = document.getElementById("thumbnailCanvas");
+    const colorInfo = document.getElementById("colorInfo");
+    const positionInfo = document.getElementById("positionInfo");
+    const imageSizeInfo = document.getElementById("imageSizeInfo");
+    const colorMini = document.getElementById("colorMini");
     const scaleSelect = document.getElementById("scaleSelect");
-    const handToolBtn = document.getElementById("hand-tool");
-    const eyedropperToolBtn = document.getElementById("eyedropper-tool");
     
-    let ctx; 
-    let image;
-    let aspectRatio;
+    const resizeBtn = document.getElementById("resizeBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const pixelInfo = document.getElementById("originalPixelCount");
+    const newPixelInfo = document.getElementById("resizedPixelCount");
+    const resizeModal = document.getElementById("resizeModal");
+    const confirmResizeBtn = document.getElementById("confirmResizeBtn");
+    const resizeUnitsSelect = document.getElementById("resizeUnitsSelect");
+    const resizeWidthInput = document.getElementById("newWidthInput");
+    const resizeHeightInput = document.getElementById("newHeightInput");
+    const proportionsCheckbox = document.getElementById("proportionsCheckbox");
+
+
+    let ctx = canvas.getContext("2d");
+    let thumbnailCtx = thumbnailCanvas.getContext("2d");
+    let image = new Image();
+    let aspectRatio = 1;
     let scale = 1;
-    let activeTool = 'none';
-
-// $(function () {
-//     $('[data-toggle="tooltip"]').tooltip()
-//   })
-// document.getElementById('importForm').addEventListener('submit', function(event) {
-//     event.preventDefault();
-//     const url = document.getElementById('urlInput').value.trim();
-//     if (url) {
-//         loadImageFromURL(url);
-//     } else {
-//         const fileInput = document.getElementById('fileInput');
-//         if (fileInput.files.length > 0) {
-//             const file = fileInput.files[0];
-//             const reader = new FileReader();
-//             reader.onload = function(event) {
-//                 const img = new Image();
-//                 img.src = event.target.result;
-//                 img.onload = function() {
-//                     loadImage(img);
-//                     $('#importModal').modal('hide');
-//                     showCoordinatesInSidebar();
-//                     showColorInSidebar();
-//                 };
-//             };
-//             reader.readAsDataURL(file);
-//         }
-//     }
-
-//     document.getElementById('importForm').reset();
-// });
 
     function getPixelInfo(event) {
         const rect = canvas.getBoundingClientRect();
         let x = Math.round(event.clientX - rect.left);
         let y = Math.round(event.clientY - rect.top);
 
-        if (x < 0) {
-            x = 0;
-        }
-        if (y < 0) {
-            y = 0;
-        }
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
 
         const pixelData = ctx.getImageData(x, y, 1, 1).data;
-        const color = `RGB: ${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]}`;
-        const colorString = `Color: ${color}`;
-        
-        colorInfo.textContent = colorString;
-        positionInfo.textContent = `Position: ${x}, ${y}`;
-        colorSample.style.backgroundColor = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
+        const color = `${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]}`;
+        colorInfo.textContent = `${color}`;
+        positionInfo.textContent = `XY: ${x}, ${y}`;
+        colorMini.style.backgroundColor = `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
     }
 
-    function loadImageFromURL(url) {
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const imageURL = URL.createObjectURL(blob);
-                loadImage(imageURL);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                if (error == "Error: Network response was not ok") {
-                    alert("Failed to load image. Response from third party website was not ok. Try again or try load image from another website");
-                } else if (error == "TypeError: Failed to fetch") {
-                    alert("Failed to load image. Your image has been probably blocked by CORS policy. Please try load image from another website.");
-                } else {
-                    alert("Failed to load image. Please check the URL and try again.");
-                }
-        });
+    async function loadImageFromURL(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const blob = await response.blob();
+            const imageURL = URL.createObjectURL(blob);
+            loadImage(imageURL);
+        } catch (error) {
+            handleImageLoadError(error);
+        }
     }
-    
-    scaleSelect.addEventListener("change", function() {
-        const factor = parseFloat(this.value);
-        scaleImage(factor);
-    });
 
+    function handleImageLoadError(error) {
+        console.error('Возникла проблема:', error);
+        if (error.message.includes("Network response was not ok")) {
+            alert("Не удалось загрузить изображение. Ответ со стороннего веб-сайта был неудовлетворительным. Попробуйте еще раз или попробуйте загрузить изображение с другого сайта.");
+        } else if (error.message.includes("Failed to fetch")) {
+            alert("Не удалось загрузить изображение. Вероятно, ваше изображение было заблокировано политикой CORS. Пожалуйста, попробуйте загрузить изображение с другого сайта.");
+        } else {
+            alert("Не удалось загрузить изображение. Пожалуйста, проверьте URL-адрес и повторите попытку.");
+        }
+    }
+
+    // Функция загрузки изображения в канвас
     function loadImage(src) {
         image = new Image();
         image.onload = function() {
-            console.log("Image loaded", image.width, image.height);
-            canvas.width = image.width;
-            canvas.height = image.height;
-            ctx = canvas.getContext("2d");
-            drawImage();
-            aspectRatio = image.width / image.height;
-            imageSizeInfo.textContent = `Размер: ${image.width} x ${image.height}`;
-
-            scrollContainer.scrollLeft = 0;
-            scrollContainer.scrollTop = 0;
+            updateCanvas();
+            updateThumbnail();
+            updateImageInfo();
 
             canvas.addEventListener("click", getPixelInfo);
             canvas.addEventListener("mousemove", getPixelInfo);
         };
         image.onerror = function() {
-            console.error("Не получилось загрузить изображение:", src);
-            alert("Не получилось загрузить изображение. Попробуйте ещё раз.");
+            handleImageLoadError(new Error("Image loading error"));
         };
         image.src = src;
     }
 
-    function drawImage() {
+    // Обновление канваса
+    function updateCanvas() {
         canvas.width = image.width * scale;
         canvas.height = image.height * scale;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        console.log("Холст очищен");
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-        console.log("Картинка отрисована");
 
-        const thumbnailCanvas = document.getElementById('thumbnailCanvas');
-        const thumbnailCtx = thumbnailCanvas.getContext('2d');
+        // Сохранение контекста для масшабирования
+        ctx.save();
+        ctx.scale(scale, scale);
+        ctx.drawImage(image, 0, 0);
+        ctx.restore();
+    }
+
+    // Обновление уменьшенной версии изображения
+    function updateThumbnail() {
         thumbnailCanvas.width = image.width / 5;
         thumbnailCanvas.height = image.height / 5;
+
         thumbnailCtx.clearRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
         thumbnailCtx.drawImage(image, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
     }
 
-    
-    function scaleImage(factor) {
-        scale = factor;
-        
-        drawImage();
+    // Обновление информации о изображении
+    function updateImageInfo() {
+        aspectRatio = image.width / image.height;
+        imageSizeInfo.textContent = `Размер: ${image.width} x ${image.height}`;
     }
 
+    // Масштабирование изображения
+    // function scaleImage(factor) {
+    //     scale = factor;
+
+    //     updateCanvas();
+    // }
+
+    // Загрузка изображения через FileInput или URL
     const fileInput = document.getElementById("fileInput");
     const urlInput = document.getElementById("urlInput");
     const uploadBtn = document.getElementById("uploadBtn");
@@ -168,287 +143,142 @@ document.addEventListener("DOMContentLoaded", function() {
             reader.readAsDataURL(file);
         } else {
             alert("Введите URL или выберите файл.");
-            return;
         }
     });
 
-// function renderCanvas(img) {
-//     const container = document.querySelector('.image-canvas');
-//     const containerWidth = container.clientWidth;
-//     const containerHeight = container.clientHeight;
+    // Обработчик изменения масштаба
+    scaleSelect.addEventListener("change", function() {
+        scale = parseFloat(this.value);
+        updateCanvas();
+    });
 
-//     const padding = { top: 50, bottom: 50, left: 50, right: 50 };
+    proportionsCheckbox.addEventListener("change", function() {
+        if (resizeUnitsSelect.value === "percentage") {
+            if (this.checked) {
+                const value = resizeWidthInput.value;
+                resizeHeightInput.value = value;
+            }
+        }
+    });
 
-//     const maxWidth = containerWidth - padding.left - padding.right;
-//     const maxHeight = containerHeight - padding.top - padding.bottom;
+    resizeBtn.addEventListener("click", function() {
+        pixelInfo.textContent = `Размер: ${(image.width * image.height / 1e6).toFixed(2)}`;
+    });
 
-//     const scaleX = maxWidth / img.width;
-//     const scaleY = maxHeight / img.height;
-//     const scale = Math.min(scaleX, scaleY);
+    // Функция для обновления размеров и расчета новой площади
+    function updateNewPixelInfo() {
+        let newWidth, newHeight;
+        const isPercentage = resizeUnitsSelect.value === "percentage";
 
-//     const scaledWidth = img.width * scale;
-//     const scaledHeight = img.height * scale;
+        if (isPercentage) {
+            const widthFactor = parseFloat(resizeWidthInput.value) / 100;
+            const heightFactor = parseFloat(resizeHeightInput.value) / 100;
+            newWidth = Math.round(image.width * widthFactor);
+            newHeight = Math.round(image.height * heightFactor);
+        } else {
+            newWidth = parseInt(resizeWidthInput.value);
+            newHeight = parseInt(resizeHeightInput.value);
+        }
 
-//     const canvas = document.createElement('canvas');
-//     canvas.width = containerWidth;
-//     canvas.height = containerHeight;
-//     const ctx = canvas.getContext('2d');
+        if (isNaN(newWidth) || isNaN(newHeight)) {
+            newPixelInfo.textContent = "0";
+        } else {
+            newPixelInfo.textContent = `${(newWidth * newHeight / 1e6).toFixed(2)}`;
+        }
+    }
 
-//     ctx.fillStyle = 'lightgrey';
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Обработчик для ввода ширины
+    function handleWidthInput() {
+        if (resizeUnitsSelect.value === "percentage") {
+            if (proportionsCheckbox.checked) {
+                resizeHeightInput.value = resizeWidthInput.value;  // Сохраняем пропорции
+            }
+        } else {
+            if (proportionsCheckbox.checked) {
+                resizeHeightInput.value = Math.round(resizeWidthInput.value / aspectRatio);
+            }
+        }
 
-//     const offsetX = (containerWidth - scaledWidth) / 2;
-//     const offsetY = (containerHeight - scaledHeight) / 2;
+        updateNewPixelInfo();
+    }
 
-//     ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+    // Обработчик для ввода высоты
+    function handleHeightInput() {
+        if (resizeUnitsSelect.value === "percentage") {
+            if (proportionsCheckbox.checked) {
+                resizeWidthInput.value = resizeHeightInput.value;  // Сохраняем пропорции
+            }
+        } else {
+            if (proportionsCheckbox.checked) {
+                resizeWidthInput.value = Math.round(resizeHeightInput.value * aspectRatio);
+            }
+        }
 
-//     canvas.classList.add('main-canvas');
-//     container.innerHTML = '';
-//     container.appendChild(canvas);
+        updateNewPixelInfo();
+    }
 
+    // Привязываем обработчики событий для ввода ширины и высоты
+    resizeWidthInput.addEventListener("input", handleWidthInput);
+    resizeHeightInput.addEventListener("input", handleHeightInput);
 
-
-//     const scaleSelect = document.getElementById('scaleSelect');
-//     scaleSelect.value = scale.toString();
-
-//     const canvasSize = `${img.width}x${img.height}`;
-//     document.querySelector('.img-size').textContent = `Размеры: ${canvasSize}`;
-
-//     scaleSelect.addEventListener('change', function() {
-//         const selectedScale = parseFloat(scaleSelect.value);
-//         renderCanvasWithScale(img, selectedScale);
-//     });
-
-//     const previousOption = scaleSelect.querySelector('.custom');
-//     if (previousOption) {
-//         previousOption.remove();
-//     }
-
-//     const initialScale = calculateInitialScale(img);
-//     const newOption = document.createElement('option');
-//     newOption.classList.add('custom')
-//     newOption.value = initialScale.toString();
-//     newOption.textContent = Math.round(initialScale * 100) + '%';
-//     newOption.selected = true;
-
-//     scaleSelect.appendChild(newOption);
-
-//     const originalPixelCountSpan = document.getElementById('originalPixelCount');
-
-//     const originalPixelCount = img.width * img.height;
-
-//     originalPixelCountSpan.textContent = (originalPixelCount / (1000000)).toFixed(2);
-
-//     showCoordinatesInSidebar();
-//     showColorInSidebar();
-// }
-
-// function calculateInitialScale(img) {
-//     const container = document.querySelector('.image-canvas');
-//     const containerWidth = container.clientWidth;
-//     const containerHeight = container.clientHeight;
-
-//     const padding = { top: 100, bottom: 100, left: 50, right: 50 };
-
-//     const maxWidth = containerWidth - padding.left - padding.right;
-//     const maxHeight = containerHeight - padding.top - padding.bottom;
-
-//     const scaleX = maxWidth / img.width;
-//     const scaleY = maxHeight / img.height;
-//     return Math.min(scaleX, scaleY);
-// }
-
-// function renderCanvasWithScale(img, scale) {
-//     const container = document.querySelector('.image-canvas');
-//     const containerWidth = container.clientWidth;
-//     const containerHeight = container.clientHeight;
-
-//     const scaledWidth = img.width * scale;
-//     const scaledHeight = img.height * scale;
-
-//     const canvas = document.createElement('canvas');
-//     canvas.width = containerWidth;
-//     canvas.height = containerHeight;
-//     const ctx = canvas.getContext('2d');
-
-//     ctx.fillStyle = 'lightgrey';
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//     const offsetX = (containerWidth - scaledWidth) / 2;
-//     const offsetY = (containerHeight - scaledHeight) / 2;
-
-//     ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
-
-//     canvas.classList.add('main-canvas');
-//     container.innerHTML = '';
-//     container.appendChild(canvas);
-
-//     const thumbnailCanvas = document.getElementById('thumbnailCanvas');
-//     const thumbnailCtx = thumbnailCanvas.getContext('2d');
-//     thumbnailCanvas.width = img.width / 5;
-//     thumbnailCanvas.height = img.height / 5;
-//     thumbnailCtx.clearRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-//     thumbnailCtx.drawImage(img, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-
-//     const canvasSize = `${canvas.width}x${canvas.height}`;
-//     document.querySelector('.img-size').textContent = `Размеры: ${canvasSize}`;
-
-//     showCoordinatesInSidebar();
-//     showColorInSidebar();
-// }
-
-// function showCoordinatesInSidebar() {
-//     const canvas = document.querySelector('.main-canvas');
-//     const sidebar = document.querySelector('.img-coordinates');
-
-//     canvas.addEventListener('mousemove', function(event) {
-//         const rect = canvas.getBoundingClientRect();
-//         const scaleX = canvas.width / rect.width;
-//         const scaleY = canvas.height / rect.height;
-//         const x = Math.floor((event.clientX - rect.left) * scaleX);
-//         const y = Math.floor((event.clientY - rect.top) * scaleY);
+    confirmResizeBtn.addEventListener("click", function() {
+        let newWidth, newHeight;
         
-//         sidebar.innerHTML = `X: ${x}, Y: ${y}`;
-//     });
-// }
+        // Определяем новый размер на основе процентов или пикселей
+        if (resizeUnitsSelect.value === "percentage") {
+            const widthPercentage = resizeWidthInput.value;
+            const heightPercentage = resizeHeightInput.value;
+    
+            if (!widthPercentage || !heightPercentage) {
+                alert("Заполните и ширину, и высоту.");
+                return;
+            }
+    
+            const widthFactor = parseFloat(widthPercentage) / 100;
+            const heightFactor = parseFloat(heightPercentage) / 100;
+            newWidth = Math.round(image.width * widthFactor);
+            newHeight = Math.round(image.height * heightFactor);
+        } else {
+            newWidth = parseInt(resizeWidthInput.value);
+            newHeight = parseInt(resizeHeightInput.value);
+        }
+    
+        // Проверка на корректность новых размеров
+        if (newWidth <= 0 || newHeight <= 0) {
+            alert("Ширина или высота должны быть больше 0.");
+            return;
+        }
+    
+        // Изменяем размер изображения и сразу рисуем его на холсте
+        resizeAndDrawImageNearestNeighbor(image, newWidth, newHeight);
 
-// function getColorAtPixel(canvas, x, y) {
-//     const ctx = canvas.getContext('2d');
-//     const pixelData = ctx.getImageData(x, y, 1, 1).data;
-//     return `rgb(${pixelData[0]}, ${pixelData[1]}, ${pixelData[2]})`;
-// }
+        aspectRatio = newWidth / newHeight;
+        imageSizeInfo.textContent = `Размер: ${newWidth} x ${newHeight}`;
+        resizedImage.src = resizedImageData;
+    });
+    
+    // Функция изменения размера и рисования изображения на существующем холсте
+    function resizeAndDrawImageNearestNeighbor(image, width, height) {
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+    
+        ctx.imageSmoothingEnabled = false;
+    
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(scale, scale);  
+        ctx.drawImage(image, 0, 0, width, height); 
+        ctx.restore();
+    }
+    
+    // Сохранение изображения
+    saveBtn.addEventListener("click", function() {
+        const link = document.createElement("a");
+        link.download = "Image.png";
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+    
 
-// function showColorInSidebar() {
-//     const canvas = document.querySelector('.main-canvas');
-//     const sidebar = document.querySelector('.img-color');
-
-//     canvas.addEventListener('click', function(event) {
-//         const rect = canvas.getBoundingClientRect();
-//         const scaleX = canvas.width / rect.width;
-//         const scaleY = canvas.height / rect.height;
-//         const x = Math.floor((event.clientX - rect.left) * scaleX);
-//         const y = Math.floor((event.clientY - rect.top) * scaleY);
-//         const color = getColorAtPixel(canvas, x, y);
-        
-//         const rectangleCanvas = createColorRectangle(color);
-//         const colorCode = createColorCodeElement(color);
-
-//         sidebar.innerHTML = '';
-//         sidebar.appendChild(rectangleCanvas);
-//         sidebar.appendChild(colorCode);
-//     });
-// }
-
-// function createColorRectangle(color) {
-//     const rectangleCanvas = document.createElement('canvas');
-//     rectangleCanvas.width = 20;
-//     rectangleCanvas.height = 20;
-//     rectangleCanvas.classList.add('color-mini')
-//     const rectCtx = rectangleCanvas.getContext('2d');
-//     rectCtx.fillStyle = color;
-//     rectCtx.fillRect(0, 0, 20, 20);
-//     return rectangleCanvas;
-// }
-
-// function createColorCodeElement(color) {
-//     const colorCode = document.createElement('div');
-//     colorCode.textContent = color;
-//     return colorCode;
-// }
-
-// function resizeImageNearestNeighbor(imageData, newWidth, newHeight) {
-//     const canvas = document.createElement('canvas');
-//     canvas.width = newWidth;
-//     canvas.height = newHeight;
-//     const ctx = canvas.getContext('2d');
-
-//     const srcData = imageData.data;
-//     const srcWidth = imageData.width;
-//     const srcHeight = imageData.height;
-
-//     const destData = new Uint8ClampedArray(newWidth * newHeight * 4);
-
-//     const scaleX = srcWidth / newWidth;
-//     const scaleY = srcHeight / newHeight;
-
-//     for (let y = 0; y < newHeight; y++) {
-//         for (let x = 0; x < newWidth; x++) {
-//             const srcX = Math.floor(x * scaleX);
-//             const srcY = Math.floor(y * scaleY);
-
-//             const srcIndex = (srcY * srcWidth + srcX) * 4;
-//             const destIndex = (y * newWidth + x) * 4;
-
-//             destData[destIndex] = srcData[srcIndex]; // Red channel
-//             destData[destIndex + 1] = srcData[srcIndex + 1]; // Green channel
-//             destData[destIndex + 2] = srcData[srcIndex + 2]; // Blue channel
-//             destData[destIndex + 3] = srcData[srcIndex + 3]; // Alpha channel
-//         }
-//     }
-
-//     const newImageData = new ImageData(destData, newWidth, newHeight);
-//     ctx.putImageData(newImageData, 0, 0);
-
-//     return canvas;
-// }
-
-
-// document.getElementById('resizeForm').addEventListener('submit', function(event) {
-//     event.preventDefault();
-
-//     const newWidthInput = document.getElementById('newWidthInput');
-//     const newHeightInput = document.getElementById('newHeightInput');
-//     const resizeUnitsSelect = document.getElementById('resizeUnitsSelect');
-//     const proportionsCheckbox = document.getElementById('proportionsCheckbox');
-
-//     let newWidth = parseInt(newWidthInput.value);
-//     let newHeight = parseInt(newHeightInput.value);
-
-//     const units = resizeUnitsSelect.value;
-
-//     if (isNaN(newWidth) || isNaN(newHeight) || newWidth <= 0 || newHeight <= 0) {
-//         alert('Пожалуйста, введите корректные значения ширины и высоты.');
-//         return;
-//     }
-
-//     if (units === 'percents') {
-//         const container = document.querySelector('.image-canvas');
-//         const containerWidth = container.clientWidth;
-//         const containerHeight = container.clientHeight;
-
-//         newWidth = (newWidth / 100) * containerWidth;
-//         newHeight = (newHeight / 100) * containerHeight;
-//     }
-
-//     if (proportionsCheckbox.checked) {
-//         const canvas = document.querySelector('.main-canvas');
-//         const canvasWidth = canvas.width;
-//         const canvasHeight = canvas.height;
-//         const ratio = canvasWidth / canvasHeight;
-
-//         if (newWidth && !newHeight) {
-//             newHeight = newWidth / ratio;
-//         } else if (newHeight && !newWidth) {
-//             newWidth = newHeight * ratio;
-//         } else {
-//             const newRatio = newWidth / newHeight;
-//             if (newRatio !== ratio) {
-//                 if (newRatio > ratio) {
-//                     newHeight = newWidth / ratio;
-//                 } else {
-//                     newWidth = newHeight * ratio;
-//                 }
-//             }
-//         }
-//     }
-
-//     const canvas = document.querySelector('.main-canvas');
-//     const ctx = canvas.getContext('2d');
-//     const originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-//     const resizedImage = resizeImageNearestNeighbor(originalImageData, newWidth, newHeight);
-
-//     document.querySelector('.img-size').textContent = `Размеры: ${newWidth}x${newHeight}`;
-//     renderCanvas(resizedImage);
-// });
 });
