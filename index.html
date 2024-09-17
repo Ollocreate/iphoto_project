@@ -67,6 +67,47 @@
               <option value="2">200%</option>
               <option value="3">300%</option>
           </select>
+          <div class="sidebar-tools">
+            <button class="sidebar-tool" id="handTool" title="Move image with mouse or arrow keys">
+              <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M13.5 3C13.2239 3 13 3.22386 13 3.5V12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12V5.5C11 5.22386 10.7761 5 10.5 5C10.2239 5 9.99999 5.22386 9.99999 5.5V13.9677C9.99999 15.0757 8.62655 15.5918 7.8969 14.7579L5.34951 11.8466C5.19167 11.6662 4.95459 11.576 4.71675 11.6057C4.15329 11.6761 3.88804 12.3395 4.24762 12.779L8.93807 18.5118C10.2266 20.0867 12.154 21 14.1888 21C17.3982 21 20 18.3982 20 15.1888V7.5C20 7.22386 19.7761 7 19.5 7C19.2239 7 19 7.22386 19 7.5V12C19 12.5523 18.5523 13 18 13C17.4477 13 17 12.5523 17 12V5.5C17 5.22386 16.7761 5 16.5 5C16.2239 5 16 5.22386 16 5.5V12C16 12.5523 15.5523 13 15 13C14.4477 13 14 12.5523 14 12V3.5C14 3.22386 13.7761 3 13.5 3ZM15.9611 3.05823C15.7525 1.88823 14.73 1 13.5 1C12.27 1 11.2475 1.88823 11.0389 3.05823C10.8653 3.0201 10.685 3 10.5 3C9.11928 3 7.99999 4.11929 7.99999 5.5V11.8386L6.85467 10.5296C6.2595 9.84942 5.36551 9.50903 4.46868 9.62113C2.34401 9.88672 1.34381 12.3883 2.6997 14.0455L7.39016 19.7783C9.05854 21.8174 11.5541 23 14.1888 23C18.5028 23 22 19.5028 22 15.1888V7.5C22 6.11929 20.8807 5 19.5 5C19.315 5 19.1347 5.0201 18.9611 5.05823C18.7525 3.88823 17.73 3 16.5 3C16.315 3 16.1347 3.0201 15.9611 3.05823Z" fill="#0F0F0F"/>
+              </svg>
+            </button>
+            <button class="sidebar-tool" id="eyedropperTool" title="Select colors from the image">
+              <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M3.36828 4.36828C2.39197 5.34459 2.39197 6.9275 3.36828 7.90381L6.55026 11.0858L4.42894 13.2071C4.03842 13.5976 4.03842 14.2308 4.42894 14.6213C4.81946 15.0119 5.45263 15.0119 5.84315 14.6213L7.25737 13.2071L13.2678 19.2175C13.7296 19.6793 14.4176 19.7771 14.9752 19.5107L16.0962 20.6317C17.0725 21.608 18.6554 21.608 19.6317 20.6317C20.608 19.6554 20.608 18.0725 19.6317 17.0962L18.5107 15.9752C18.7771 15.4176 18.6793 14.7296 18.2175 14.2678L12.2071 8.25737L13.6213 6.84315C14.0119 6.45263 14.0119 5.81946 13.6213 5.42894C13.2308 5.03842 12.5976 5.03842 12.2071 5.42894L10.0858 7.55026L6.90381 4.36828C5.9275 3.39197 4.34459 3.39197 3.36828 4.36828ZM10.7929 9.67158L8.67158 11.7929L14.3888 17.5101C14.9464 17.2438 15.6344 17.3415 16.0962 17.8033L17.5104 19.2175C17.7057 19.4128 18.0223 19.4128 18.2175 19.2175C18.4128 19.0223 18.4128 18.7057 18.2175 18.5104L16.8033 17.0962C16.3415 16.6344 16.2438 15.9464 16.5101 15.3888L10.7929 9.67158Z" fill="#000000"/>
+              </svg>
+            </button>
+
+                <!-- Eyedropper Info Panel -->
+              <div id="eyedropper-panel">
+                <div class="eyedropper-color-info">
+                    <div class="eyedropper-color-item">
+                      <div class="color-chosen">
+                        <p class="eyedropper-title">Цвет №1</p>
+                        <div class="swatch" id="eyedropper-swatch-1"></div>
+                      </div>
+                        <div id="eyedropper-color-1-rgb"></div>
+                        <div id="eyedropper-color-1-xyz"></div>
+                        <div id="eyedropper-color-1-lab"></div>
+                        <div id="eyedropper-position-info-1">Координаты: </div>
+                    </div>
+                    <div class="eyedropper-color-item">
+                      <div class="color-chosen">
+                        <p class="eyedropper-title">Цвет №2</p>
+                        <div class="swatch" id="eyedropper-swatch-2"></div>
+                      </div>
+                        <div id="eyedropper-color-2-rgb"></div>
+                        <div id="eyedropper-color-2-xyz"></div>
+                        <div id="eyedropper-color-2-lab"></div>
+                        <div id="eyedropper-position-info-2">Координаты: </div>
+                    </div>
+                </div>
+                <p id="eyedropper-contrast-info">Контрастность: </p>
+            </div>
+          </div>
         </div>
         </div>
       </div>

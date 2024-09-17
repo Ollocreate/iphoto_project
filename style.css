@@ -74,3 +74,41 @@ li {
 .tooltip-toggle:hover .tooltip-icon {
     color:#68a2ca;
 }
+
+.sidebar-tool {
+    border-width: 1px;
+    border-radius: 3px;
+    padding: 1px 3px;
+}
+
+
+.sidebar-tool:hover {
+    background-color: #68a2ca;
+}
+
+
+.active {
+    background-color: #68a2ca;
+}
+
+.sidebar-tools {
+    margin-top: 5px;
+}
+
+.eyedropper-title {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#eyedropper-panel .swatch {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: 1px solid #000;
+    margin-left: 10px;
+}
+
+.color-chosen {
+    display: flex;
+    align-items: center;
+}
