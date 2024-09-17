@@ -22,7 +22,6 @@
             <li><button class="dropdown-item" type="button" id="saveBtn">Сохранить</button></li>
           </ul>
         </div>
-        <button type="button" class="btn btn-light">Редактировать</button>
         <div class="btn-group" role="group">
           <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             Изображение
@@ -31,8 +30,8 @@
             <li><button id="resizeBtn" class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#resizeModal">Изменить размер</button></li>
           </ul>
         </div>
-        <button type="button" class="btn btn-light">Слои</button>
-        <button type="button" class="btn btn-light">Фильтры</button>
+        <button type="button" class="btn btn-light" id="curvesBtn" data-bs-toggle="modal" data-bs-target="#curvesModal">Кривые</button>
+        <button type="button" class="btn btn-light" id="filterBtn" data-bs-toggle="modal" data-bs-target="#filterModal">Фильтры</button>
       </div>
     </header>
     
@@ -81,7 +80,6 @@
               </svg>
             </button>
 
-                <!-- Eyedropper Info Panel -->
               <div id="eyedropper-panel">
                 <div class="eyedropper-color-info">
                     <div class="eyedropper-color-item">
@@ -214,6 +212,86 @@
         </div>
       </div>
       </div>
+
+      <div class="modal fade" id="curvesModal" tabindex="-1" aria-labelledby="curvesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-right">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="importModalLabel">Кривые</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+              <form id="importForm">
+                <div class="mb-4">
+                  <label for="fileInput" class="form-label">Введите значения:</label>
+                  <div class="curves-input row align-items-center">
+                    <label for="point1-input">Точка 1:</label>
+                    <input type="number" class="form-control point-input" id="point1-input-in" value="0" min="0" max="255"> →
+                    <input type="number" class="form-control point-input" id="point1-input-out" value="0" min="0" max="255">
+                </div>
+                <div class="curves-input row align-items-center">
+                    <label for="point2-input">Точка 2:</label>
+                    <input type="number" class="form-control point-input" id="point2-input-in" value="255" min="0" max="255"> →
+                    <input type="number" class="form-control point-input" id="point2-input-out" value="255" min="0" max="255">
+                </div>
+                <div>
+                    <input type="checkbox" class="form-check-input mr-5" id="previewСheckbox">
+                    <label for="proportionsCheckbox" class="form-label">Предварительный просмотр</label>
+                </div>
+                <svg id="curves-graph" width="300" height="300" viewBox="0 0 255 255" style="border: 1px solid black;">
+                    <polyline id="curve-line" points="" fill="blue" stroke="blue" stroke-width="2"/>
+                    <circle id="point1-circle" cx="0" cy="255" r="5" fill="red"/>
+                    <circle id="point2-circle" cx="255" cy="0" r="5" fill="red"/>
+                </svg>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="resetСurves">Сбросить</button>
+              <button type="submit" class="btn btn-primary" form="importForm" data-bs-dismiss="modal" id="applyСurves">Преобразовать</button>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-right">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Кривые</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+              </div>
+              <div class="modal-body">
+                <form id="importForm">
+                  <div class="mb-4">
+                    <label for="fileInput" class="form-label">Введите значения:</label>
+                    <div class="curves-input row align-items-center">
+                      <label for="point1-input">Точка 1:</label>
+                      <input type="number" class="form-control point-input" id="point1-input-in" value="0" min="0" max="255"> →
+                      <input type="number" class="form-control point-input" id="point1-input-out" value="0" min="0" max="255">
+                  </div>
+                  <div class="curves-input row align-items-center">
+                      <label for="point2-input">Точка 2:</label>
+                      <input type="number" class="form-control point-input" id="point2-input-in" value="255" min="0" max="255"> →
+                      <input type="number" class="form-control point-input" id="point2-input-out" value="255" min="0" max="255">
+                  </div>
+                  <div>
+                      <input type="checkbox" class="form-check-input mr-5" id="previewСheckbox">
+                      <label for="proportionsCheckbox" class="form-label">Предварительный просмотр</label>
+                  </div>
+                  <svg id="curves-graph" width="300" height="300" viewBox="0 0 255 255" style="border: 1px solid black;">
+                      <polyline id="curve-line" points="" fill="blue" stroke="blue" stroke-width="2"/>
+                      <circle id="point1-circle" cx="0" cy="255" r="5" fill="red"/>
+                      <circle id="point2-circle" cx="255" cy="0" r="5" fill="red"/>
+                  </svg>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="resetСurves">Сбросить</button>
+                <button type="submit" class="btn btn-primary" form="importForm" data-bs-dismiss="modal" id="applyСurves">Преобразовать</button>
+              </div>
+            </div>
+          </div>
+          </div>
 </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
