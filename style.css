@@ -125,5 +125,9 @@ li {
     height: 100%;
     margin: 0;
     transform: none;
-    width: 400px; /* Устанавливаем ширину модального окна */
+    width: 400px;
+}
+
+.modal-shadow {
+    box-shadow: -6px 10px 8px 7px rgba(96, 101, 105, 0.48);
 }

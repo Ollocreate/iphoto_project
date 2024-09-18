@@ -1,9 +1,9 @@
 $(function () {
-    $('[data-toggle="tooltip"]').tooltip();
+    $("[data-toggle='tooltip']").tooltip();
 });
 
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function(event) {
+document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("submit", function(event) {
         event.preventDefault();
     });
 });
@@ -55,13 +55,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const point2 = document.getElementById("point2-circle");
     const curveLine = document.getElementById("curve-line");
 
+    const matrixInputs = document.querySelectorAll(".matrix");
+    const presetSelect = document.getElementById("filterSelect");
+    const previewCheck = document.getElementById("previewCheck");
+    const filterApplyBtn = document.getElementById("applyFilter");
+    const filterResetBtn = document.getElementById("resetFilter");
 
     let ctx = canvas.getContext("2d");
     let thumbnailCtx = thumbnailCanvas.getContext("2d");
     let image = new Image();
     let aspectRatio = 1;
     let scale = 1;
-    let activeTool = 'none';
+    let activeTool = "none";
+    let originalPixels;
 
     function getPixelInfo(event) {
         const rect = canvas.getBoundingClientRect();
@@ -81,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function() {
     async function loadImageFromURL(url) {
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error("Network response was not ok");
             const blob = await response.blob();
             const imageURL = URL.createObjectURL(blob);
             loadImage(imageURL);
@@ -91,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function handleImageLoadError(error) {
-        console.error('Возникла проблема:', error);
+        console.error("Возникла проблема:", error);
         if (error.message.includes("Network response was not ok")) {
             alert("Не удалось загрузить изображение. Ответ со стороннего веб-сайта был неудовлетворительным. Попробуйте еще раз или попробуйте загрузить изображение с другого сайта.");
         } else if (error.message.includes("Failed to fetch")) {
@@ -101,7 +107,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Функция загрузки изображения в канвас
     function loadImage(src) {
         image = new Image();
         image.onload = function() {
@@ -118,42 +123,33 @@ document.addEventListener("DOMContentLoaded", function() {
         image.src = src;
     }
 
-    // Обновление канваса
     function updateCanvas() {
         canvas.width = image.width * scale;
         canvas.height = image.height * scale;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Сохранение контекста для масшабирования
         ctx.save();
         ctx.scale(scale, scale);
         ctx.drawImage(image, 0, 0);
         ctx.restore();
     }
 
-    // Обновление уменьшенной версии изображения
     function updateThumbnail() {
-        thumbnailCanvas.width = image.width / 5;
-        thumbnailCanvas.height = image.height / 5;
+        const canvas = document.getElementById("imageCanvas");
+
+        thumbnailCanvas.width = canvas.width / 5;
+        thumbnailCanvas.height = canvas.height / 5;
 
         thumbnailCtx.clearRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-        thumbnailCtx.drawImage(image, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+        thumbnailCtx.drawImage(canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
     }
 
-    // Обновление информации о изображении
     function updateImageInfo() {
+        originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
         aspectRatio = image.width / image.height;
         imageSizeInfo.textContent = `Размер: ${image.width} x ${image.height}`;
     }
 
-    // Масштабирование изображения
-    // function scaleImage(factor) {
-    //     scale = factor;
-
-    //     updateCanvas();
-    // }
-
-    // Загрузка изображения через FileInput или URL
     const fileInput = document.getElementById("fileInput");
     const urlInput = document.getElementById("urlInput");
     const uploadBtn = document.getElementById("uploadBtn");
@@ -174,7 +170,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Обработчик изменения масштаба
     scaleSelect.addEventListener("change", function() {
         scale = parseFloat(this.value);
         updateCanvas();
@@ -193,7 +188,6 @@ document.addEventListener("DOMContentLoaded", function() {
         pixelInfo.textContent = `Размер: ${(image.width * image.height / 1e6).toFixed(2)}`;
     });
 
-    // Функция для обновления размеров и расчета новой площади
     function updateNewPixelInfo() {
         let newWidth, newHeight;
         const isPercentage = resizeUnitsSelect.value === "percentage";
@@ -215,7 +209,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Обработчик для ввода ширины
     function handleWidthInput() {
         if (resizeUnitsSelect.value === "percentage") {
             if (proportionsCheckbox.checked) {
@@ -230,7 +223,6 @@ document.addEventListener("DOMContentLoaded", function() {
         updateNewPixelInfo();
     }
 
-    // Обработчик для ввода высоты
     function handleHeightInput() {
         if (resizeUnitsSelect.value === "percentage") {
             if (proportionsCheckbox.checked) {
@@ -245,14 +237,12 @@ document.addEventListener("DOMContentLoaded", function() {
         updateNewPixelInfo();
     }
 
-    // Привязываем обработчики событий для ввода ширины и высоты
     resizeWidthInput.addEventListener("input", handleWidthInput);
     resizeHeightInput.addEventListener("input", handleHeightInput);
 
     confirmResizeBtn.addEventListener("click", function() {
         let newWidth, newHeight;
         
-        // Определяем новый размер на основе процентов или пикселей
         if (resizeUnitsSelect.value === "percentage") {
             const widthPercentage = resizeWidthInput.value;
             const heightPercentage = resizeHeightInput.value;
@@ -271,18 +261,15 @@ document.addEventListener("DOMContentLoaded", function() {
             newHeight = parseInt(resizeHeightInput.value);
         }
     
-        // Проверка на корректность новых размеров
         if (newWidth <= 0 || newHeight <= 0) {
             alert("Ширина или высота должны быть больше 0.");
             return;
         }
     
-        // Изменяем размер изображения и сразу рисуем его на холсте
         resizeAndDrawImageNearestNeighbor(image, newWidth, newHeight);
 
         aspectRatio = newWidth / newHeight;
         imageSizeInfo.textContent = `Размер: ${newWidth} x ${newHeight}`;
-        resizedImage.src = resizedImageData;
     });
     
     // Функция изменения размера и рисования изображения на существующем холсте
@@ -321,25 +308,25 @@ document.addEventListener("DOMContentLoaded", function() {
    
         activeTool = tool;
    
-        if (tool === 'hand') {
-            handToolBtn.classList.add('active');
-            eyedropperToolBtn.classList.remove('active'); // деактивируем eyedropper tool, если он активен
-            canvas.style.cursor = 'grab';
-        } else if (tool === 'eyedropper') {
-            eyedropperToolBtn.classList.add('active'); // активируем eyedropper tool
-            handToolBtn.classList.remove('active'); // деактивируем hand tool, если он активен
-            canvas.style.cursor = 'crosshair';
+        if (tool === "hand") {
+            handToolBtn.classList.add("active");
+            eyedropperToolBtn.classList.remove("active"); // деактивируем eyedropper tool, если он активен
+            canvas.style.cursor = "grab";
+        } else if (tool === "eyedropper") {
+            eyedropperToolBtn.classList.add("active"); // активируем eyedropper tool
+            handToolBtn.classList.remove("active"); // деактивируем hand tool, если он активен
+            canvas.style.cursor = "crosshair";
         }
     }
    
-    handToolBtn.addEventListener("click", () => activateTool('hand'));
-    eyedropperToolBtn.addEventListener("click", () => activateTool('eyedropper'));
+    handToolBtn.addEventListener("click", () => activateTool("hand"));
+    eyedropperToolBtn.addEventListener("click", () => activateTool("eyedropper"));
 
 
     let currentR1, currentR2, currentG1, currentG2, currentB1, currentB2
 
     canvas.addEventListener("mousedown", function(e) {
-        if (activeTool === 'eyedropper') {
+        if (activeTool === "eyedropper") {
             const x = e.offsetX;
             const y = e.offsetY;
             const imageData = ctx.getImageData(x, y, 1, 1).data;
@@ -390,17 +377,17 @@ document.addEventListener("DOMContentLoaded", function() {
     let isDragging = false;
     let lastX, lastY;
 
-    scrollContainer.addEventListener('mousedown', (e) => {
-        if (activeTool === 'hand') {
+    scrollContainer.addEventListener("mousedown", (e) => {
+        if (activeTool === "hand") {
             isDragging = true;
-            canvas.style.cursor = 'grabbing';
+            canvas.style.cursor = "grabbing";
             lastX = e.clientX;
             lastY = e.clientY;
         }
     });
 
-    scrollContainer.addEventListener('mousemove', (e) => {
-        if (isDragging && activeTool === 'hand') {
+    scrollContainer.addEventListener("mousemove", (e) => {
+        if (isDragging && activeTool === "hand") {
             const dx = e.clientX - lastX;
             const dy = e.clientY - lastY;
 
@@ -412,19 +399,19 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    scrollContainer.addEventListener('mouseup', () => {
+    scrollContainer.addEventListener("mouseup", () => {
         isDragging = false;
     });
 
-    scrollContainer.addEventListener('mouseleave', () => {
+    scrollContainer.addEventListener("mouseleave", () => {
         isDragging = false;
     });
 
     document.addEventListener("keydown", function(e) {
-        if (e.key === 'h') {
-            activateTool('hand');
-        } else if (e.key === 'e') {
-            activateTool('eyedropper');
+        if (e.key === "h") {
+            activateTool("hand");
+        } else if (e.key === "e") {
+            activateTool("eyedropper");
         }
     });
     
@@ -589,6 +576,7 @@ document.addEventListener("DOMContentLoaded", function() {
             try {
                 (function () {
                     originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 }())
             } catch (error) {
                 console.error("No image\n",error)
@@ -631,15 +619,17 @@ document.addEventListener("DOMContentLoaded", function() {
             data[i] = lut[originalData[i]];         // Red
             data[i + 1] = lut[originalData[i + 1]]; // Green
             data[i + 2] = lut[originalData[i + 2]]; // Blue
-            data[i + 3] = originalData[i + 3];      // Alpha остается неизменным
+            data[i + 3] = originalData[i + 3];      // Alpha
         }
 
         ctx.putImageData(imageData, 0, 0);
+        updateThumbnail()
     }
 
     function resetImage() {
         if (!originalImageData) {
             originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
         }
 
         let x1 = 0
@@ -756,6 +746,7 @@ document.addEventListener("DOMContentLoaded", function() {
         try {
             (function () {
                 originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
             }())
         } catch (error) {
             console.error("No image\n",error)
@@ -778,5 +769,180 @@ document.addEventListener("DOMContentLoaded", function() {
             resetImage()
         }
     })
+
+    filterBtn.addEventListener("click", function() {
+        try {
+            (function () {
+                image.width
+            }())
+        } catch (error) {
+            console.error("No image\n",error)
+            return
+        }
+    });
+
+    presetSelect.addEventListener("change", handlePresetChange);
+    filterResetBtn.addEventListener("click", resetFilter);
+    filterApplyBtn.addEventListener("click", function () {
+        if (previewCheck.checked == true) {
+            originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } else {
+            applyFilter(false);
+        }
+        resetFilter();
+        previewCheck.checked = false;
+    });
+
+    const presets = {
+        identity: [0, 0, 0, 0, 1, 0, 0, 0, 0],
+        sharpen: [0, -1, 0, -1, 5, -1, 0, -1, 0],
+        gaussian: [1/16, 2/16, 1/16, 2/16, 4/16, 2/16, 1/16, 2/16, 1/16],  // Gaussian Blur 3x3
+        box: [1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9]  // Box Blur 3x3
+    };
+
+    previewCheck.addEventListener("change", handlePreview);
+
+    matrixInputs.forEach(input => {
+        input.addEventListener("input", () => {
+            if (previewCheck.checked) {
+                applyFilter(true);
+            }
+        });
+    });
+
+    function handlePreview() {
+        if (previewCheck.checked) {
+            applyFilter(true);
+        } else {
+            resetFilter();
+        }
+    }
+
+    function handlePresetChange() {
+        const preset = presets[presetSelect.value];
+        if (preset) {
+            matrixInputs.forEach((input, index) => {
+                input.value = preset[index];
+            });
+        }
+        if (previewCheck.checked) {
+            applyFilter(true)
+        }
+    }
+
+    function applyFilter(isPreview = false) {
+        const canvas = document.getElementById("imageCanvas");
+        const ctx = canvas.getContext("2d");
+    
+        const kernel = Array.from(matrixInputs).map(input => parseFloat(input.value));
+        
+        let sourcePixels = originalPixels;
+
+        if (isPreview) {
+            sourcePixels = originalPixels;
+        } else {
+            sourcePixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        const filteredPixels = applyConvolution(sourcePixels, kernel);
+
+        ctx.putImageData(filteredPixels, 0, 0);
+
+        if (!isPreview) {
+            originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        updateThumbnail();
+    }
+
+    function resetFilter() {
+        if (originalPixels) {
+            ctx.putImageData(originalPixels, 0, 0);
+        }
+
+        let i = 0
+        switch (presetSelect.value){
+            case "identity":
+                matrixInputs.forEach((input) => {
+                    input.value = presets.identity[i];
+                    i++
+                });
+                i = 0
+                if (previewCheck.checked) {
+                    applyFilter(true)
+                }
+                break
+            case "sharpen":
+                matrixInputs.forEach((input) => {
+                    input.value = presets.sharpen[i];
+                    i++
+                });
+                i = 0
+                if (previewCheck.checked) {
+                    applyFilter(true)
+                }
+                break
+            case "gaussian":
+                matrixInputs.forEach((input) => {
+                    input.value = presets.gaussian[i];
+                    i++
+                });
+                i = 0
+                if (previewCheck.checked) {
+                    applyFilter(true)
+                }
+                break
+            case "box":
+                matrixInputs.forEach((input) => {
+                    input.value = presets.box[i];
+                    i++
+                });
+                i = 0
+                if (previewCheck.checked) {
+                    applyFilter(true)
+                }
+                break
+        }
+    }
+
+    function applyConvolution(imageData, kernel) {
+        const canvas = document.getElementById("imageCanvas");
+        const ctx = canvas.getContext("2d");
+        const { data, width, height } = imageData;
+        const side = Math.sqrt(kernel.length);
+        const half = Math.floor(side / 2);
+        const output = ctx.createImageData(width, height);
+        const outputData = output.data;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const pixelIndex = (y * width + x) * 4;
+                let r = 0, g = 0, b = 0;
+
+                for (let ky = 0; ky < side; ky++) {
+                    for (let kx = 0; kx < side; kx++) {
+                        const offsetX = Math.min(width - 1, Math.max(0, x + kx - half));
+                        const offsetY = Math.min(height - 1, Math.max(0, y + ky - half));
+
+                        const offsetIndex = (offsetY * width + offsetX) * 4;
+                        const weight = kernel[ky * side + kx];
+
+                        r += data[offsetIndex] * weight;
+                        g += data[offsetIndex + 1] * weight;
+                        b += data[offsetIndex + 2] * weight;
+                    }
+                }
+
+                outputData[pixelIndex] = Math.min(Math.max(r, 0), 255);
+                outputData[pixelIndex + 1] = Math.min(Math.max(g, 0), 255);
+                outputData[pixelIndex + 2] = Math.min(Math.max(b, 0), 255);
+                outputData[pixelIndex + 3] = data[pixelIndex + 3];
+            }
+        }
+
+        return output;
+    }
 
 });
