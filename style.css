@@ -13,7 +13,7 @@
     background-color: lightgray;
 }
 
-.scroll-container {
+.working-area {
     overflow: auto;
 }
 
@@ -130,4 +130,8 @@ li {
 
 .modal-shadow {
     box-shadow: -6px 10px 8px 7px rgba(96, 101, 105, 0.48);
+}
+
+#histogramCanvas {
+    display: none;
 }

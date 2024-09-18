@@ -28,24 +28,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const proportionsCheckbox = document.getElementById("proportionsCheckbox");
 
     const handToolBtn = document.getElementById("handTool");
-    const scrollContainer = document.querySelector(".scroll-container");
+    const workingArea = document.querySelector(".working-area");
     const eyedropperToolBtn = document.getElementById("eyedropperTool");
-    const eyedropperSwatch1 = document.getElementById("eyedropper-swatch-1");
-    const eyedropperSwatch2 = document.getElementById("eyedropper-swatch-2");
-    const eyedropperColor1RGB = document.getElementById("eyedropper-color-1-rgb");
-    const eyedropperColor2RGB = document.getElementById("eyedropper-color-2-rgb");
-    const eyedropperColor1XYZ = document.getElementById("eyedropper-color-1-xyz");
-    const eyedropperColor2XYZ = document.getElementById("eyedropper-color-2-xyz");
-    const eyedropperColor1LAB = document.getElementById("eyedropper-color-1-lab");
-    const eyedropperColor2LAB = document.getElementById("eyedropper-color-2-lab");
-    const eyedropperPositionInfo1 = document.getElementById("eyedropper-position-info-1");
-    const eyedropperPositionInfo2 = document.getElementById("eyedropper-position-info-2");
     const eyedropperContrastInfo = document.getElementById("eyedropper-contrast-info");
 
     const curvesModal = document.getElementById("curvesModal");
     const applyCurvesBtn = document.getElementById("applyСurves");
     const resetCurvesBtn = document.getElementById("resetСurves");
-    const previewCheckbox = document.getElementById("previewСheckbox");
+    const previewCurvesCheck = document.getElementById("previewCurvesCheck");
     const point1InputIn = document.getElementById("point1-input-in");
     const point1InputOut = document.getElementById("point1-input-out");
     const point2InputIn = document.getElementById("point2-input-in");
@@ -57,9 +47,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const matrixInputs = document.querySelectorAll(".matrix");
     const presetSelect = document.getElementById("filterSelect");
-    const previewCheck = document.getElementById("previewCheck");
-    const filterApplyBtn = document.getElementById("applyFilter");
-    const filterResetBtn = document.getElementById("resetFilter");
+    const previewFilterCheck = document.getElementById("previewFilterCheck");
+    const applyFilterBtn = document.getElementById("applyFilter");
+    const resetFilterBtn = document.getElementById("resetFilter");
 
     let ctx = canvas.getContext("2d");
     let thumbnailCtx = thumbnailCanvas.getContext("2d");
@@ -272,7 +262,6 @@ document.addEventListener("DOMContentLoaded", function() {
         imageSizeInfo.textContent = `Размер: ${newWidth} x ${newHeight}`;
     });
     
-    // Функция изменения размера и рисования изображения на существующем холсте
     function resizeAndDrawImageNearestNeighbor(image, width, height) {
         canvas.width = width;
         canvas.height = height;
@@ -287,7 +276,6 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.restore();
     }
     
-    // Сохранение изображения
     saveBtn.addEventListener("click", function() {
         const link = document.createElement("a");
         link.download = "Image.png";
@@ -323,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function() {
     eyedropperToolBtn.addEventListener("click", () => activateTool("eyedropper"));
 
 
-    let currentR1, currentR2, currentG1, currentG2, currentB1, currentB2
+    let currentR1, currentR2, currentG1, currentG2, currentB1, currentB2;
 
     canvas.addEventListener("mousedown", function(e) {
         if (activeTool === "eyedropper") {
@@ -332,52 +320,58 @@ document.addEventListener("DOMContentLoaded", function() {
             const imageData = ctx.getImageData(x, y, 1, 1).data;
 
             const rgbColor = `rgb(${imageData[0]}, ${imageData[1]}, ${imageData[2]})`;
-            const xyzColorData = RGBtoXYZ(imageData)
-            const labColorData = XYZtoLAB(xyzColorData)
+            const xyzColorData = RGBtoXYZ(imageData);
+            const labColorData = XYZtoLAB(xyzColorData);
 
-            const xyzColor = `xyz(${xyzColorData[0].toFixed(2)}, ${xyzColorData[1].toFixed(2)}, ${xyzColorData[2].toFixed(2)})`
-            const labColor = `lab(${labColorData[0].toFixed(2)}, ${labColorData[1].toFixed(2)}, ${labColorData[2].toFixed(2)})`
+            const xyzColor = `xyz(${xyzColorData[0].toFixed(2)}, ${xyzColorData[1].toFixed(2)}, ${xyzColorData[2].toFixed(2)})`;
+            const labColor = `lab(${labColorData[0].toFixed(2)}, ${labColorData[1].toFixed(2)}, ${labColorData[2].toFixed(2)})`;
 
-            const rgbColorString = `${rgbColor}`;
-            const xyzColorString = `${xyzColor}`
-            const labColorString = `${labColor}`
+            const colorInfo = {
+                rgb: rgbColor,
+                xyz: xyzColor,
+                lab: labColor,
+                coords: `Координаты: ${x}, ${y}`,
+                r: imageData[0],
+                g: imageData[1],
+                b: imageData[2],
+            };
 
             if (e.button === 0 && (e.shiftKey || e.ctrlKey || e.altKey)) {
-                eyedropperSwatch2.style.backgroundColor = rgbColor;
-
-                eyedropperColor2RGB.textContent = rgbColorString
-                eyedropperColor2XYZ.textContent = xyzColorString
-                eyedropperColor2LAB.textContent = labColorString
-
-                eyedropperPositionInfo2.textContent = `Координаты: ${x}, ${y}`
-
-                currentR2 = imageData[0]
-                currentG2 = imageData[1]
-                currentB2 = imageData[2]
-
-                checkContrastRatio(currentR1, currentR2, currentG1, currentG2, currentB1, currentB2)
+                updateEyedropperUI('2', colorInfo);
+                updateColorValues('2', colorInfo);
             } else {
-                eyedropperSwatch1.style.backgroundColor = rgbColor;
-
-                eyedropperColor1RGB.textContent = rgbColorString
-                eyedropperColor1XYZ.textContent = xyzColorString
-                eyedropperColor1LAB.textContent = labColorString
-
-                eyedropperPositionInfo1.textContent = `Координаты: ${x}, ${y}`
-
-                currentR1 = imageData[0]
-                currentG1 = imageData[1]
-                currentB1 = imageData[2]
-
-                checkContrastRatio(currentR1, currentR2, currentG1, currentG2, currentB1, currentB2)
+                updateEyedropperUI('1', colorInfo);
+                updateColorValues('1', colorInfo);
             }
+
+            checkContrastRatio(currentR1, currentR2, currentG1, currentG2, currentB1, currentB2);
         }
     });
+
+    function updateEyedropperUI(swatchNumber, colorInfo) {
+        document.querySelector(`#eyedropper-swatch-${swatchNumber}`).style.backgroundColor = colorInfo.rgb;
+        document.querySelector(`#eyedropper-color-${swatchNumber}-rgb`).textContent = colorInfo.rgb;
+        document.querySelector(`#eyedropper-color-${swatchNumber}-xyz`).textContent = colorInfo.xyz;
+        document.querySelector(`#eyedropper-color-${swatchNumber}-lab`).textContent = colorInfo.lab;
+        document.querySelector(`#eyedropper-position-info-${swatchNumber}`).textContent = colorInfo.coords;
+    }
+
+    function updateColorValues(swatchNumber, colorInfo) {
+        if (swatchNumber === '1') {
+            currentR1 = colorInfo.r;
+            currentG1 = colorInfo.g;
+            currentB1 = colorInfo.b;
+        } else {
+            currentR2 = colorInfo.r;
+            currentG2 = colorInfo.g;
+            currentB2 = colorInfo.b;
+        }
+    }
 
     let isDragging = false;
     let lastX, lastY;
 
-    scrollContainer.addEventListener("mousedown", (e) => {
+    workingArea.addEventListener("mousedown", (e) => {
         if (activeTool === "hand") {
             isDragging = true;
             canvas.style.cursor = "grabbing";
@@ -386,24 +380,24 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    scrollContainer.addEventListener("mousemove", (e) => {
+    workingArea.addEventListener("mousemove", (e) => {
         if (isDragging && activeTool === "hand") {
             const dx = e.clientX - lastX;
             const dy = e.clientY - lastY;
 
-            scrollContainer.scrollLeft -= dx;
-            scrollContainer.scrollTop -= dy;
+            workingArea.scrollLeft -= dx;
+            workingArea.scrollTop -= dy;
 
             lastX = e.clientX;
             lastY = e.clientY;
         }
     });
 
-    scrollContainer.addEventListener("mouseup", () => {
+    workingArea.addEventListener("mouseup", () => {
         isDragging = false;
     });
 
-    scrollContainer.addEventListener("mouseleave", () => {
+    workingArea.addEventListener("mouseleave", () => {
         isDragging = false;
     });
 
@@ -415,139 +409,88 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
     
-    
     function RGBtoXYZ([R, G, B]) {
-        const [var_R, var_G, var_B] = [R, G, B]
-            .map(x => x / 255)
-            .map(x => x > 0.04045
-                ? Math.pow(((x + 0.055) / 1.055), 2.4)
-                : x / 12.92)
-            .map(x => x * 100)
+        // Преобразование RGB к нормализованным значениям и затем в XYZ
+        const [var_R, var_G, var_B] = [R, G, B].map(x => {
+            const normalized = x / 255;
+            return normalized > 0.04045
+                ? Math.pow((normalized + 0.055) / 1.055, 2.4)
+                : normalized / 12.92;
+        }).map(x => x * 100);
     
-        X = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805
-        Y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722
-        Z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505
-        return [X, Y, Z]
+        const X = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805;
+        const Y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722;
+        const Z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505;
+    
+        return [X, Y, Z];
     }
-
+    
     function XYZtoLAB([x, y, z]) {
-        const ref_X =  95.047;
-        const ref_Y = 100.000;
-        const ref_Z = 108.883;
-
-        const [ var_X, var_Y, var_Z ] = [ x / ref_X, y / ref_Y, z / ref_Z ]
-            .map(a => a > 0.008856
+        const ref_X = 95.047, ref_Y = 100.000, ref_Z = 108.883;
+    
+        const [var_X, var_Y, var_Z] = [x / ref_X, y / ref_Y, z / ref_Z].map(a => {
+            return a > 0.008856
                 ? Math.pow(a, 1 / 3)
-                : (7.787 * a) + (16 / 116))
+                : (7.787 * a) + (16 / 116);
+        });
     
-        CIE_L = (116 * var_Y) - 16
-        CIE_a = 500 * (var_X - var_Y)
-        CIE_b = 200 * (var_Y - var_Z)
+        const CIE_L = (116 * var_Y) - 16;
+        const CIE_a = 500 * (var_X - var_Y);
+        const CIE_b = 200 * (var_Y - var_Z);
     
-        return [CIE_L, CIE_a, CIE_b]
+        return [CIE_L, CIE_a, CIE_b];
     }
 
-
-    // Функция написана по методике описанной в https://www.w3.org/TR/WCAG20-TECHS/G18.html
     function checkContrastRatio(r1_8bit, r2_8bit, g1_8bit, g2_8bit, b1_8bit, b2_8bit) {
-        const sr1 = r1_8bit / 255
-        const sr2 = r2_8bit / 255
-        const sg1 = g1_8bit / 255
-        const sg2 = g2_8bit / 255
-        const sb1 = b1_8bit / 255
-        const sb2 = b2_8bit / 255
-
-        if (isNaN(sr1) || isNaN(sr2) || isNaN(sg1) || isNaN(sg2) || isNaN(sb1) || isNaN(sb2)) {
-            return
+        function convertToLinearComponent(value) {
+            const s = value / 255;
+            return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        }
+    
+        if ([r1_8bit, r2_8bit, g1_8bit, g2_8bit, b1_8bit, b2_8bit].some(isNaN)) {
+            return;
         }
 
-        let r1, r2, g1, g2, b1, b2
+        const [r1, g1, b1] = [r1_8bit, g1_8bit, b1_8bit].map(convertToLinearComponent);
+        const [r2, g2, b2] = [r2_8bit, g2_8bit, b2_8bit].map(convertToLinearComponent);
 
-        if (sr1 <= 0.03928) {
-            r1 = sr1 / 12.92
-        } else {
-            r1 = ((sr1 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        if (sr2 <= 0.03928) {
-            r2 = sr2 / 12.92
-        } else {
-            r2 = ((sr2 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        if (sg1 <= 0.03928) {
-            g1 = sg1 / 12.92
-        } else {
-            g1 = ((sg1 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        if (sg2 <= 0.03928) {
-            g2 = sg2 / 12.92
-        } else {
-            g2 = ((sg2 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        if (sb1 <= 0.03928) {
-            b1 = sb1 / 12.92
-        } else {
-            b1 = ((sb1 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        if (sb2 <= 0.03928) {
-            b2 = sb2 / 12.92
-        } else {
-            b2 = ((sb2 + 0.055) / 1.055 ) ** 2.4
-        }
-
-        const l1 = 0.2126 * r1 + 0.7152 * g1 + 0.0722 * b1
-        const l2 = 0.2126 * r2 + 0.7152 * g2 + 0.0722 * b2
-
-        if ((l1 + 0.05) / (l2 + 0.05) >= 4.5) {
-            eyedropperContrastInfo.textContent = `Контрастность: ${((l1+0.05) / (l2 + 0.05)).toFixed(2)} (Достаточная)`
-
-            eyedropperContrastInfo.style.color = "green"
-        } else if ((l2 + 0.05) / (l1 + 0.05) >= 4.5) {
-            eyedropperContrastInfo.textContent = `Контрастность: ${((l2+0.05) / (l1 + 0.05)).toFixed(2)} (Достаточная)`
-
-            eyedropperContrastInfo.style.color = "green"
-        } else {
-            // Контраст меньше 4.5
-            if (((l1 + 0.05) / (l2 + 0.05)) >= ((l2 + 0.05) / (l1 + 0.05))) {
-                eyedropperContrastInfo.textContent = `Контрастность: ${((l1+0.05) / (l2 + 0.05)).toFixed(2)} (Недостаточная)`
-
-                eyedropperContrastInfo.style.color = "red"
-            } else {
-                eyedropperContrastInfo.textContent = `Контрастность: ${((l2+0.05) / (l1 + 0.05)).toFixed(2)} (Недостаточная)`
-
-                eyedropperContrastInfo.style.color = "red"
-            }
-        }
+        const l1 = 0.2126 * r1 + 0.7152 * g1 + 0.0722 * b1;
+        const l2 = 0.2126 * r2 + 0.7152 * g2 + 0.0722 * b2;
+    
+        const contrastRatio = (l1 + 0.05) / (l2 + 0.05);
+        const reverseContrastRatio = (l2 + 0.05) / (l1 + 0.05);
+    
+        const sufficientContrast = contrastRatio >= 4.5 || reverseContrastRatio >= 4.5;
+        const contrastValue = sufficientContrast ? Math.max(contrastRatio, reverseContrastRatio) : Math.min(contrastRatio, reverseContrastRatio);
+    
+        eyedropperContrastInfo.textContent = `Контрастность: ${contrastValue.toFixed(2)} (${sufficientContrast ? 'Достаточная' : 'Недостаточная'})`;
+        eyedropperContrastInfo.style.color = sufficientContrast ? "green" : "red";
     }
-
+    
     document.getElementById("curvesBtn").addEventListener("click", function() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         try {
-            (function () {
-                image.width
-            }())
+            if (!image.width) throw new Error("No image");
         } catch (error) {
-            console.error("No image\n",error)
-            return
+            console.error("No image\n", error);
+            return;
         }
-
+    
         updateSVGCurve();
+        generateHistogram(imageData);
     });
-
+    
     let activePoint = null;
-
+    let originalImageData = null;
+    
     function resetValues() {
         point1InputIn.value = 0;
         point1InputOut.value = 0;
         point2InputIn.value = 255;
         point2InputOut.value = 255;
-
         updateSVGCurve();
     }
-
+    
     function updateSVGCurve() {
         const x1 = parseInt(point1InputIn.value);
         const y1 = 255 - parseInt(point1InputOut.value);
@@ -558,38 +501,36 @@ document.addEventListener("DOMContentLoaded", function() {
         point1.setAttribute("cy", y1);
         point2.setAttribute("cx", x2);
         point2.setAttribute("cy", y2);
-
-        const curvePoints = `${x1},${y1} ${x2},${y2}`
-        curveLine.setAttribute("points", curvePoints)
+    
+        const curvePoints = `${x1},${y1} ${x2},${y2}`;
+        curveLine.setAttribute("points", curvePoints);
+    
+        updateBoundaryLines(x1, y1, x2, y2);
     }
-
+    
+    function updateBoundaryLines(x1, y1, x2, y2) {
+        const line1 = document.getElementById("line1");
+        const line2 = document.getElementById("line2");
+    
+        line1.setAttribute("x1", x1);
+        line1.setAttribute("y1", y1);
+        line1.setAttribute("x2", -50);
+        line1.setAttribute("y2", y1);
+    
+        line2.setAttribute("x1", x2);
+        line2.setAttribute("y1", y2);
+        line2.setAttribute("x2", 256);
+        line2.setAttribute("y2", y2);
+    }
+    
     function validateInput() {
         if (parseInt(point1InputIn.value) >= parseInt(point2InputIn.value)) {
             point2InputIn.value = parseInt(point1InputIn.value) + 1;
         }
     }
-
-    let originalImageData = null;
-
-    function applyCurvesCorrection() {
-        if (!originalImageData) {
-            try {
-                (function () {
-                    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                }())
-            } catch (error) {
-                console.error("No image\n",error)
-                return
-            }
-        }
-
-        const x1 = parseInt(point1InputIn.value);
-        const y1 = parseInt(point1InputOut.value);
-        const x2 = parseInt(point2InputIn.value);
-        const y2 = parseInt(point2InputOut.value);
-
-        // LUT (Look-Up Table)
+    
+    // Создание LUT (Look-Up Table) для коррекции кривых
+    function createLUT(x1, y1, x2, y2) {
         let lut = new Array(256);
         for (let i = 0; i <= 255; i++) {
             if (i <= x1) {
@@ -600,75 +541,116 @@ document.addEventListener("DOMContentLoaded", function() {
                 lut[i] = Math.round(((y2 - y1) / (x2 - x1)) * (i - x1) + y1);
             }
         }
-
-        let imageData
-        let data
-        let originalData
-        try {
-            (function () {
-                imageData = ctx.createImageData(originalImageData.width, originalImageData.height);
-                data = imageData.data;
-                originalData = originalImageData.data;
-            }())
-        } catch (error) {
-            console.error("No image\n",error)
-            return
+        return lut;
+    }
+    
+    // Применение коррекции по кривым
+    function applyCurvesCorrection() {
+        if (!originalImageData) {
+            try {
+                originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            } catch (error) {
+                console.error("No image\n", error);
+                return;
+            }
         }
-
+    
+        const x1 = parseInt(point1InputIn.value);
+        const y1 = parseInt(point1InputOut.value);
+        const x2 = parseInt(point2InputIn.value);
+        const y2 = parseInt(point2InputOut.value);
+    
+        const lut = createLUT(x1, y1, x2, y2);
+    
+        let imageData = ctx.createImageData(originalImageData.width, originalImageData.height);
+        let data = imageData.data;
+        let originalData = originalImageData.data;
+    
         for (let i = 0; i < originalData.length; i += 4) {
             data[i] = lut[originalData[i]];         // Red
             data[i + 1] = lut[originalData[i + 1]]; // Green
             data[i + 2] = lut[originalData[i + 2]]; // Blue
             data[i + 3] = originalData[i + 3];      // Alpha
         }
-
+    
         ctx.putImageData(imageData, 0, 0);
-        updateThumbnail()
+        updateThumbnail();
+        generateHistogram(imageData);
+    }
+    
+    function generateHistogram(imageData) {
+        const histogram = {
+            red: new Array(256).fill(0),
+            green: new Array(256).fill(0),
+            blue: new Array(256).fill(0),
+        };
+    
+        const data = imageData.data;
+    
+        for (let i = 0; i < data.length; i += 4) {
+            histogram.red[data[i]]++;
+            histogram.green[data[i + 1]]++;
+            histogram.blue[data[i + 2]]++;
+        }
+    
+        drawHistogram(histogram);
+    }
+    
+    function drawHistogram(histogram) {
+        const histogramCanvas = document.getElementById("histogramCanvas");
+        const histCtx = histogramCanvas.getContext("2d");
+    
+        histCtx.clearRect(0, 0, histogramCanvas.width, histogramCanvas.height);
+    
+        const maxCount = Math.max(...histogram.red, ...histogram.green, ...histogram.blue);
+    
+        const colors = ['rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 0, 0.5)', 'rgba(0, 0, 255, 0.5)'];
+        const histograms = [histogram.red, histogram.green, histogram.blue];
+    
+        histograms.forEach((hist, index) => {
+            histCtx.fillStyle = colors[index];
+            hist.forEach((count, i) => {
+                const height = (count / maxCount) * histogramCanvas.height;
+                histCtx.fillRect(i, histogramCanvas.height - height, 1, height);
+            });
+        });
+    
+        setHistogramBackground();
+    }
+    
+    function setHistogramBackground() {
+        const histogramCanvas = document.getElementById("histogramCanvas");
+        const svgImage = document.querySelector("#curves-graph image");
+    
+        svgImage.setAttribute('href', histogramCanvas.toDataURL());
     }
 
     function resetImage() {
         if (!originalImageData) {
-            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            console.error("No original image data available.");
+            return;
         }
-
-        let x1 = 0
-        let y1 = 0
-        let x2 = 255
-        let y2 = 255
-
-        let lut = new Array(256);
-        for (let i = 0; i <= 255; i++) {
-            if (i <= x1) {
-                lut[i] = y1;
-            } else if (i >= x2) {
-                lut[i] = y2;
-            } else {
-                lut[i] = Math.round(((y2 - y1) / (x2 - x1)) * (i - x1) + y1);
-            }
+    
+        const { width, height, data: originalData } = originalImageData;
+        const lut = new Array(256);
+        const x1 = 0, y1 = 0, x2 = 255, y2 = 255;
+    
+        for (let i = 0; i < 256; i++) {
+            lut[i] = (i <= x1) ? y1 :
+                     (i >= x2) ? y2 :
+                     Math.round(((y2 - y1) / (x2 - x1)) * (i - x1) + y1);
         }
-
-        let imageData
-        let data
-        let originalData
-        try {
-            (function () {
-                imageData = ctx.createImageData(originalImageData.width, originalImageData.height);
-                data = imageData.data;
-                originalData = originalImageData.data;
-            }())
-        } catch (error) {
-            console.error("No image\n",error)
-            return
-        }
-
+    
+        const imageData = ctx.createImageData(width, height);
+        const data = imageData.data;
+    
         for (let i = 0; i < originalData.length; i += 4) {
-            data[i] = lut[originalData[i]];
+            data[i]     = lut[originalData[i]];
             data[i + 1] = lut[originalData[i + 1]];
             data[i + 2] = lut[originalData[i + 2]];
             data[i + 3] = originalData[i + 3];
         }
-
+    
         ctx.putImageData(imageData, 0, 0);
     }
 
@@ -697,7 +679,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             updateSVGCurve();
-            if (previewCheckbox.checked) {
+            if (previewCurvesCheck.checked) {
                 applyCurvesCorrection();
             }
         }
@@ -707,40 +689,23 @@ document.addEventListener("DOMContentLoaded", function() {
         activePoint = null;
     });
 
-    point1InputIn.addEventListener("input", function() {
+    function handleInput() {
         validateInput();
         updateSVGCurve();
-        if (previewCheckbox.checked) {
+        if (previewCurvesCheck.checked) {
             applyCurvesCorrection();
         }
-    });
+    }
 
-    point1InputOut.addEventListener("input", function() {
-        updateSVGCurve();
-        if (previewCheckbox.checked) {
-            applyCurvesCorrection();
-        }
-    });
-
-    point2InputIn.addEventListener("input", function() {
-        validateInput();
-        updateSVGCurve();
-        if (previewCheckbox.checked) {
-            applyCurvesCorrection();
-        }
-    });
-
-    point2InputOut.addEventListener("input", function() {
-        updateSVGCurve();
-        if (previewCheckbox.checked) {
-            applyCurvesCorrection();
-        }
-    });
+    point1InputIn.addEventListener("input", handleInput);
+    point1InputOut.addEventListener("input", handleInput);
+    point2InputIn.addEventListener("input", handleInput);
+    point2InputOut.addEventListener("input", handleInput);
 
     applyCurvesBtn.addEventListener("click", function() {
         applyCurvesCorrection();
         resetValues();
-        previewCheckbox.checked = false
+        previewCurvesCheck.checked = false
         curvesModal.style.display = "none";
 
         try {
@@ -756,13 +721,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     resetCurvesBtn.addEventListener("click", function() {
         resetValues();
-        if (previewCheckbox.checked) {
+        if (previewCurvesCheck.checked) {
             applyCurvesCorrection();
         }
     });
 
-    previewCheckbox.addEventListener("click", function() {
-        if (previewCheckbox.checked) {
+    previewCurvesCheck.addEventListener("click", function() {
+        if (previewCurvesCheck.checked) {
             updateSVGCurve();
             applyCurvesCorrection();
         } else {
@@ -782,16 +747,18 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     presetSelect.addEventListener("change", handlePresetChange);
-    filterResetBtn.addEventListener("click", resetFilter);
-    filterApplyBtn.addEventListener("click", function () {
-        if (previewCheck.checked == true) {
+
+    resetFilterBtn.addEventListener("click", resetFilter);
+
+    applyFilterBtn.addEventListener("click", function () {
+        if (previewFilterCheck.checked == true) {
             originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
             originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         } else {
             applyFilter(false);
         }
         resetFilter();
-        previewCheck.checked = false;
+        previewFilterCheck.checked = false;
     });
 
     const presets = {
@@ -801,111 +768,74 @@ document.addEventListener("DOMContentLoaded", function() {
         box: [1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9, 1/9]  // Box Blur 3x3
     };
 
-    previewCheck.addEventListener("change", handlePreview);
-
-    matrixInputs.forEach(input => {
-        input.addEventListener("input", () => {
-            if (previewCheck.checked) {
-                applyFilter(true);
-            }
+    function resetFilter() {
+        const canvas = document.getElementById("imageCanvas");
+        const ctx = canvas.getContext("2d");
+    
+        if (originalPixels) {
+            ctx.putImageData(originalPixels, 0, 0);
+        } else {
+            console.error("originalPixels is not set");
+            return;
+        }
+    
+        const preset = presets[presetSelect.value] || presets.identity;
+        matrixInputs.forEach((input, index) => {
+            input.value = preset[index] !== undefined ? preset[index] : 0;
         });
-    });
-
+    
+        if (previewFilterCheck.checked) {
+            applyFilter(true);
+        }
+    }
+    
     function handlePreview() {
-        if (previewCheck.checked) {
+        if (previewFilterCheck.checked) {
             applyFilter(true);
         } else {
             resetFilter();
         }
     }
-
+    
     function handlePresetChange() {
-        const preset = presets[presetSelect.value];
-        if (preset) {
-            matrixInputs.forEach((input, index) => {
-                input.value = preset[index];
-            });
-        }
-        if (previewCheck.checked) {
-            applyFilter(true)
+        const preset = presets[presetSelect.value] || presets.identity;
+        matrixInputs.forEach((input, index) => {
+            input.value = preset[index] !== undefined ? preset[index] : 0;
+        });
+    
+        if (previewFilterCheck.checked) {
+            applyFilter(true);
         }
     }
-
+    
     function applyFilter(isPreview = false) {
         const canvas = document.getElementById("imageCanvas");
         const ctx = canvas.getContext("2d");
-    
         const kernel = Array.from(matrixInputs).map(input => parseFloat(input.value));
-        
-        let sourcePixels = originalPixels;
-
-        if (isPreview) {
-            sourcePixels = originalPixels;
-        } else {
-            sourcePixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        }
-
+        const sourcePixels = isPreview ? originalPixels : ctx.getImageData(0, 0, canvas.width, canvas.height);
         const filteredPixels = applyConvolution(sourcePixels, kernel);
-
+    
         ctx.putImageData(filteredPixels, 0, 0);
-
+    
         if (!isPreview) {
             originalPixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            originalImageData = originalPixels; // Можно оптимизировать, если это одно и то же
         }
-
+    
         updateThumbnail();
     }
-
-    function resetFilter() {
-        if (originalPixels) {
-            ctx.putImageData(originalPixels, 0, 0);
-        }
-
-        let i = 0
-        switch (presetSelect.value){
-            case "identity":
-                matrixInputs.forEach((input) => {
-                    input.value = presets.identity[i];
-                    i++
-                });
-                i = 0
-                if (previewCheck.checked) {
-                    applyFilter(true)
-                }
-                break
-            case "sharpen":
-                matrixInputs.forEach((input) => {
-                    input.value = presets.sharpen[i];
-                    i++
-                });
-                i = 0
-                if (previewCheck.checked) {
-                    applyFilter(true)
-                }
-                break
-            case "gaussian":
-                matrixInputs.forEach((input) => {
-                    input.value = presets.gaussian[i];
-                    i++
-                });
-                i = 0
-                if (previewCheck.checked) {
-                    applyFilter(true)
-                }
-                break
-            case "box":
-                matrixInputs.forEach((input) => {
-                    input.value = presets.box[i];
-                    i++
-                });
-                i = 0
-                if (previewCheck.checked) {
-                    applyFilter(true)
-                }
-                break
-        }
-    }
+    
+    previewFilterCheck.addEventListener("change", handlePreview);
+    
+    matrixInputs.forEach(input => {
+        input.addEventListener("input", () => {
+            if (previewFilterCheck.checked) {
+                applyFilter(true);
+            }
+        });
+    });
+    
+    presetSelect.addEventListener("change", handlePresetChange);
 
     function applyConvolution(imageData, kernel) {
         const canvas = document.getElementById("imageCanvas");
@@ -915,34 +845,44 @@ document.addEventListener("DOMContentLoaded", function() {
         const half = Math.floor(side / 2);
         const output = ctx.createImageData(width, height);
         const outputData = output.data;
-
+    
+        const getKernelValue = (ky, kx) => kernel[ky * side + kx];
+        const getOffsetIndex = (x, y) => (y * width + x) * 4;
+    
+        function getPixel(x, y) {
+            x = Math.min(Math.max(x, 0), width - 1);
+            y = Math.min(Math.max(y, 0), height - 1);
+            return {
+                r: data[getOffsetIndex(x, y)],
+                g: data[getOffsetIndex(x, y) + 1],
+                b: data[getOffsetIndex(x, y) + 2]
+            };
+        }
+    
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const pixelIndex = (y * width + x) * 4;
                 let r = 0, g = 0, b = 0;
-
+    
                 for (let ky = 0; ky < side; ky++) {
                     for (let kx = 0; kx < side; kx++) {
-                        const offsetX = Math.min(width - 1, Math.max(0, x + kx - half));
-                        const offsetY = Math.min(height - 1, Math.max(0, y + ky - half));
-
-                        const offsetIndex = (offsetY * width + offsetX) * 4;
-                        const weight = kernel[ky * side + kx];
-
-                        r += data[offsetIndex] * weight;
-                        g += data[offsetIndex + 1] * weight;
-                        b += data[offsetIndex + 2] * weight;
+                        const offsetX = x + kx - half;
+                        const offsetY = y + ky - half;
+                        const { r: pr, g: pg, b: pb } = getPixel(offsetX, offsetY);
+                        const weight = getKernelValue(ky, kx);
+    
+                        r += pr * weight;
+                        g += pg * weight;
+                        b += pb * weight;
                     }
                 }
-
+    
                 outputData[pixelIndex] = Math.min(Math.max(r, 0), 255);
                 outputData[pixelIndex + 1] = Math.min(Math.max(g, 0), 255);
                 outputData[pixelIndex + 2] = Math.min(Math.max(b, 0), 255);
                 outputData[pixelIndex + 3] = data[pixelIndex + 3];
             }
         }
-
         return output;
     }
-
 });

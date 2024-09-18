@@ -38,7 +38,7 @@
     <div class="container-fluid mb-3">
       <div class="row">
           <div class="col-10 canvas-container">
-            <div class="scroll-container">
+            <div class="working-area">
                 <canvas id="imageCanvas"></canvas>
             </div>
         </div>
@@ -235,10 +235,21 @@
                     <input type="number" class="form-control point-input" id="point2-input-out" value="255" min="0" max="255">
                 </div>
                 <div>
-                    <input type="checkbox" class="form-check-input mr-5" id="previewСheckbox">
-                    <label for="proportionsCheckbox" class="form-label">Предварительный просмотр</label>
+                    <input type="checkbox" class="form-check-input mr-5" id="previewCurvesCheck">
+                    <label for="previewCurvesCheck" class="form-label">Предварительный просмотр</label>
                 </div>
-                <svg id="curves-graph" width="300" height="300" viewBox="0 0 255 255" style="border: 1px solid black;">
+                <canvas id="histogramCanvas" width="256" height="256"></canvas>
+                <svg id="curves-graph" width="256" height="256" viewBox="0 0 255 255" style="border: 1px solid black;">
+                  <defs>
+                    <pattern id="histogramPattern" patternUnits="userSpaceOnUse" width="256" height="256">
+                        <image href="" x="0" y="0" width="255" height="255"></image>
+                    </pattern>
+                </defs>
+                <rect x="0" y="0" width="255" height="255" fill="url(#histogramPattern)" />
+
+                <line id="line1" x1="0" y1="255" x2="-50" y2="255" stroke="blue" stroke-width="2"/>
+                <line id="line2" x1="0" y1="255" x2="256" y2="255" stroke="blue" stroke-width="2"/>
+
                     <polyline id="curve-line" points="" fill="blue" stroke="blue" stroke-width="2"/>
                     <circle id="point1-circle" cx="0" cy="255" r="5" fill="red"/>
                     <circle id="point2-circle" cx="255" cy="0" r="5" fill="red"/>
@@ -309,8 +320,8 @@
                     </div>
                   </div>
                 <div>
-                    <input type="checkbox" class="form-check-input mr-5" id="previewCheck">
-                    <label for="proportionsCheckbox" class="form-label">Предварительный просмотр</label>
+                    <input type="checkbox" class="form-check-input mr-5" id="previewFilterCheck">
+                    <label for="previewFilterCheck" class="form-label">Предварительный просмотр</label>
                 </div>
               </form>
             </div>
