@@ -112,18 +112,3 @@ li {
     display: flex;
     align-items: center;
 }
-
-.point-input {
-    width: 100px;
-    margin: 0 10px;
-}
-
-.modal-dialog-right {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    margin: 0;
-    transform: none;
-    width: 400px; /* Устанавливаем ширину модального окна */
-}
