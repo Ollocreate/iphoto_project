@@ -175,8 +175,14 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     resizeBtn.addEventListener("click", function() {
-        pixelInfo.textContent = `Размер: ${(image.width * image.height / 1e6).toFixed(2)}`;
+        const currentWidth = canvas.width / scale;  // Учитываем масштаб
+        const currentHeight = canvas.height / scale;
+    
+        pixelInfo.textContent = `${(currentWidth * currentHeight / 1e6).toFixed(2)}`;
+        
+        imageSizeInfo.textContent = `${Math.round(currentWidth)} x ${Math.round(currentHeight)}`;
     });
+    
 
     function updateNewPixelInfo() {
         let newWidth, newHeight;
@@ -271,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
     
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        ctx.scale(scale, scale);  
+        // ctx.scale(scale, scale);  
         ctx.drawImage(image, 0, 0, width, height); 
         ctx.restore();
     }
