@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function() {
         canvas.width = image.width * scale;
         canvas.height = image.height * scale;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    
         ctx.save();
         ctx.scale(scale, scale);
         ctx.drawImage(image, 0, 0);
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     resizeBtn.addEventListener("click", function() {
-        const currentWidth = canvas.width / scale;  // Учитываем масштаб
+        const currentWidth = canvas.width / scale;
         const currentHeight = canvas.height / scale;
     
         pixelInfo.textContent = `${(currentWidth * currentHeight / 1e6).toFixed(2)}`;
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function handleWidthInput() {
         if (resizeUnitsSelect.value === "percentage") {
             if (proportionsCheckbox.checked) {
-                resizeHeightInput.value = resizeWidthInput.value;  // Сохраняем пропорции
+                resizeHeightInput.value = resizeWidthInput.value;
             }
         } else {
             if (proportionsCheckbox.checked) {
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function handleHeightInput() {
         if (resizeUnitsSelect.value === "percentage") {
             if (proportionsCheckbox.checked) {
-                resizeWidthInput.value = resizeHeightInput.value;  // Сохраняем пропорции
+                resizeWidthInput.value = resizeHeightInput.value;
             }
         } else {
             if (proportionsCheckbox.checked) {
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     confirmResizeBtn.addEventListener("click", function() {
         let newWidth, newHeight;
-        
+    
         if (resizeUnitsSelect.value === "percentage") {
             const widthPercentage = resizeWidthInput.value;
             const heightPercentage = resizeHeightInput.value;
@@ -263,9 +263,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     
         resizeAndDrawImageNearestNeighbor(image, newWidth, newHeight);
-
+        const resizedImage = new Image();
+        resizedImage.src = canvas.toDataURL();
+        image = resizedImage;
+    
         aspectRatio = newWidth / newHeight;
-        imageSizeInfo.textContent = `Размер: ${newWidth} x ${newHeight}`;
+        imageSizeInfo.textContent = `${newWidth} x ${newHeight}`;
     });
     
     function resizeAndDrawImageNearestNeighbor(image, width, height) {
@@ -277,38 +280,50 @@ document.addEventListener("DOMContentLoaded", function() {
     
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.save();
-        // ctx.scale(scale, scale);  
         ctx.drawImage(image, 0, 0, width, height); 
         ctx.restore();
+
+        updateThumbnail();
     }
     
     saveBtn.addEventListener("click", function() {
+        const originalWidth = image.width;
+        const originalHeight = image.height;
+    
+        const tempCanvas = document.createElement("canvas");
+        const tempCtx = tempCanvas.getContext("2d");
+    
+        tempCanvas.width = originalWidth;
+        tempCanvas.height = originalHeight;
+    
+        tempCtx.imageSmoothingEnabled = false;
+        tempCtx.drawImage(image, 0, 0, originalWidth, originalHeight);
+    
         const link = document.createElement("a");
         link.download = "Image.png";
-        link.href = canvas.toDataURL();
+        link.href = tempCanvas.toDataURL();
         link.click();
     });
-
 
     function activateTool(tool) {
         try {
             (function () {
-                image.width // проверяем наличие загруженного изображения
+                image.width
             }())
         } catch (error) {
             console.error("No image\n", error);
-            return; // если изображения нет, инструменты не активируются
+            return;
         }
    
         activeTool = tool;
    
         if (tool === "hand") {
             handToolBtn.classList.add("active");
-            eyedropperToolBtn.classList.remove("active"); // деактивируем eyedropper tool, если он активен
+            eyedropperToolBtn.classList.remove("active");
             canvas.style.cursor = "grab";
         } else if (tool === "eyedropper") {
-            eyedropperToolBtn.classList.add("active"); // активируем eyedropper tool
-            handToolBtn.classList.remove("active"); // деактивируем hand tool, если он активен
+            eyedropperToolBtn.classList.add("active");
+            handToolBtn.classList.remove("active");
             canvas.style.cursor = "crosshair";
         }
     }
